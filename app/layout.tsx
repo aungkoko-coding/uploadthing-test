@@ -20,6 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        {/**
+         * UploadThing needs to get info from our server to get permissions info. Normally this means a loading state. To add SSR hydration and avoid that loading state, simply render the <NextSSRPlugin /> hydration helper in the body of our root layout before the children.
+         */}
         <NextSSRPlugin
           /**
            * The `extractRouterConfig` will extract **only** the route configs
