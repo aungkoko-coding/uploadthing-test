@@ -1,42 +1,45 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { UploadButton } from "../utils/uploadthing";
+import { UploadFileResponse } from "uploadthing/client";
 
 const ExampleUploaderPage = () => {
-  function downloadFile() {
-    let url =
-      "https://utfs.io/f/3095b108-12d5-4f35-a1fb-b52387e57689-qdsvdl.mp4";
-    let fileName = "video.mp4";
+  const [downloadMetadata, setDownloadMetadata] = useState<UploadFileResponse<{
+    uploadedBy: string;
+  }> | null>(null);
+  const handleDownload = async () => {
+    if (downloadMetadata) {
+      const response = await fetch(downloadMetadata.url);
+      const blob = await response.blob();
+      const downloadableUrl = URL.createObjectURL(blob);
 
-    let a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
+      const a = document.createElement("a");
+      a.href = downloadableUrl;
+      a.download = downloadMetadata.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <UploadButton
         endpoint="imageUploader"
-        onClientUploadComplete={(res) => {
+        onClientUploadComplete={(res): void => {
           console.log("Files", res);
+          setDownloadMetadata(res[0]);
           alert("Upload completed");
         }}
         onUploadError={(error: Error) => {
           alert(`ERROR! ${error.message}`);
         }}
       />
-      {/* <div className="mt-10 mx-auto">
-        <a
-          href="https://utfs.io/f/3095b108-12d5-4f35-a1fb-b52387e57689-qdsvdl.mp4"
-          download={"record.mp4"}
-        >
-          <button>Download Video</button>
-        </a>
-      </div> */}
-      <button onClick={downloadFile}>Download Video</button>
+      {downloadMetadata && (
+        <button onClick={handleDownload}>
+          Download {downloadMetadata.name}
+        </button>
+      )}
     </main>
   );
 };
